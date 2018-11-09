@@ -1,0 +1,590 @@
+---
+title: "Midterm"
+author: "Laura Howes"
+date: "November 9, 2018"
+output: html_document
+---
+
+
+####You will be graded on
+####1. Correct answers
+####2. Showing how you arrived at that answer
+####3. Well formatted and documented code
+####4. Thoughtful answers
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include = FALSE}
+
+library(readr)
+library(profileModel)
+library(ggplot2)
+library(dplyr)
+library(MASS)
+library(tidyr)
+library(brms)
+library(tidyverse)
+library(tidybayes)
+library(bayesplot)
+library(patchwork)
+library(purrr)
+library(broom)
+
+```
+
+#1) Sampling your system (10 points)
+####Each of you has a study system your work in and a question of interest. Give an example of one variable that you would sample in order to get a sense of its variation in nature. Describe, in detail, how you would sample for the population of that variable in order to understand its distribution. Questions to consider include, but are not limited to: Just what is your sample versus your population? What would your sampling design be? Why would you design it that particular way? What are potential confounding influences of both sampling technique and sample design that you need to be careful to avoid? What statistical distribution might the variable take, and why?
+
+#####I study large baleen whale behavior in their feeding grounds on Stellwagen Bank. One scientific question is what cues baleen whales use to find their food, and a hypothesis is that they use tidal flow. To understand the variability of whale feeding patterns, I could look at tidal flow as a parameter affecting when feeding occurs. To sample the population, I could create vertical transects spread 3 nm apart along the boundaries of the Stellwagen Bank National Marine Sanctuary and record surface feeding behaviors observed along the transect line within a ½ nm buffer, during the months of March through November, when feeding behavior has been consistently been observed for several decades. A ½ nm is typically the farthest you can accurately observe surface feeding behavior, and I also don't want to overlap between transect buffers. Using a bathymetry map and GIS, I would sample out feeding behaviors that only occurred at depths between 80-120 feet (approximate depth ranges of Stellwagen Bank). Since my study system is often impossible to do experimental study, this would help eliminate another variable. My sample versus my population would be feeding behaviors at depths only at 80-120 feet (sample), versus feeding behaviors of all depths (population). 
+
+
+#####The "Rule of Twelfths" as described in White et al. (2016) would be used to determine tidal flow periods, along with tide chart data from Provincetown (the closest tidal information available to Stellwagen Bank). This would result in three equal amounts of tidal flow occurring throughout a 24-hour period. Each day would have different tidal times, but the consistent pattern of the flow through the study season would remove the bias of time-of-day. Every time a feeding behavior occurred, categorical data would be entered on whether it occurred during slack, ebb, or flood tide. This would create expected values versus observed values, where the null hypothesis would be that all three tidal flow feeding observation would equal the same. A Chi-square goodness of fit test could be used to compare the observed sample distribution with the expected probability distribution. The chi-square test is the square of a standard normal distribution, so I would assume the variable would take a normal distribution.  
+
+  
+#2) Let's get philosophical. (10 points)
+####Are you a frequentist, likelihoodist, or Bayesian? Why? Include in your answer why you prefer the inferential tools (e.g. confidence intervals, test statistics, posterior probabilities, etc.) of your chosen worldview and why you do not like the ones of the other one. This includes defining just what those different tools mean! extra credit for citing and discussing outside sources - one point per source/point
+
+#####In deciding if I am a frequentist, likelihoodist, or Bayesian, I would first eliminate likelihood. "Likelihood of a particular value tells us little by itself" (Whitlock & Schluter 2015). This means that likelihood only gains meaning when compared to other likelihoods of other possible values, and I feel is it not as helpful for what to believe about a system. I ultimately sway more to frequentism and Bayes. 
+
+#####If I have to choose between those two, I am a frequentist, however not without keeping in mind the faults of frequentism and recognizing the pros of Bayesian. For instance, since taking this course, I will no longer blindly accept p-value. I think the standard p-value of 0.05 can be reevaluated depending on the study, and even in my research if I end up with a p-value close to (but still less than) 0.05, I can urge that while it's "technically" significant, to take it with a grain of salt. For example, a p-value of 0.0456 would reject the null hypothesis, but there would be a 1 in 22 the rejection of the null is false. Having an explanation included like that along with the p-value would bring a lot more clarity when expressing scientific results in papers, and I hope to stick to that practice myself. I appreciate Benjamini's perspective (Wasserstein & Nicole A. Lazar 2016) that more descriptive statistics such as confidence intervals and effect size should always be included along with a p-value. I also acknowledge that the tool of confidence intervals can frequently be misinterpreted (hence another critique of frequentism). As discussed in "Abraham Lincoln and confidence intervals" (2016), the 95 CI is often interpreted that there is 95% confidence the true mean is in that interval, but it actually means that the true mean will only be in that interval 95% of the time. I think results of frequentist tools can just be clarified more (even if it makes your paper lengthier), leading to a more honest approach of frequentism. 
+
+#####I do also see many of the appeals of Bayesian, and perhaps as I become more familiar and comfortable in applying Bayesian methods, I will ultimately covert. Honestly, I think it's hard to declare yourself as "one" statistical belief, as you can draw from each depending on what you are modeling/testing, and each has pros and cons. Bayesian is the most practical as it's a probability of belief that is constantly updated - it incorporates prior knowledge, building off of what we already know. The building off prior knowledge is an incredible useful tool, as humans learn from their history to create a better future. Though this is a nice sentiment, my skepticism creeps in wondering, what if you have a "bad" prior, or basically a "wrong belief" you are building off of? Though frequentism doesn't have priors and you have to start from scratch, there is least not the worry of a "bad" prior. There is also the reality of Bayesian in that only a small subset of people actually understand and use it. It requires a lot of extra thought, the need for priors, and the ability to gain the knowledge to learn the specialized tools to perform it (R Users Will Now Inevitably Become Bayesians 2016). This isn't to say there is no hope for the masses to convert Bayesian, it's more just looking at the reality of having other scientists not understand Bayes currently (but will hopefully grow and learn more, and have all students make sure to be taught R & Bayes!). 
+
+#####Honestly when overall have to choose between Frequentist and Bayesian, I feel it should be both, as Efron (2005) states: "The bottom line is that we have entered an era of massive scientific data collection, with a demand for answers to large-scale inference problems that lie beyond the scope of classical statistics. In the struggle to find these answers the statistics profession needs to use both frequentist and Bayesian ideas, and new combinations of the two."
+
+####REFERENCES:
+
+#####1) Abraham Lincoln and confidence intervals. 2016. https://andrewgelman.com/2016/11/23/abraham-lincoln-confidence-intervals/
+
+#####2) Efron, B., 2005. Bayesians, frequentists, and scientists. Journal of the American Statistical Association, 100(469), pp.1-5.
+
+#####3) Ronald L. Wasserstein & Nicole A. Lazar. 2016. The ASA's Statement on p-Values: Context, Process, and Purpose, The American Statistician, 70:2, 129-133, DOI: 10.1080/00031305.2016.1154108
+
+#####4) R Users Will Now Inevitably Become Bayesians. 2016. https://thinkinator.com/2016/01/12/r-users-will-now-inevitably-become-bayesians/ 
+
+#####5) Whitlock, M. & D. Schluter. 2015. Roberts and Company Publishers. Greenwood Village, CO. 
+
+
+
+#3) Power (20 points)
+####We have a lot of aspects of the sample of data that we collect which can alter the power of our linear regressions.
+
+####Slope
+####Intercept
+####Residual variance
+####Sample Size
+####Range of X values
+
+####Choose three of the above properties and demonstrate how they alter power of an F-test from a linear regression using at least three different alpha levels (more if you want!) As a baseline of the parameters, let's use the information from the seal data:
+  
+####slope = 0.00237, intercept=115.767, sigma = 5.6805, range of seal ages = 958 to 8353, or, if you prefer, seal ages ~ N(3730.246, 1293.485). Your call what distribution to use for seal age simulation.
+
+```{r Power}
+#simulate the data - need a data frame
+
+#sample size,slope,intercept is what I chose
+
+seal_data_sim <- data.frame(slope = c(0, 0.00237, 0.001),
+                      sigma = 5.6805) %>%
+  crossing(n= c(5:40)) %>%
+  crossing(intercept = c(95, 115.767, 150)) 
+
+#expand to have a certain number of simulations for each sample size
+seal_data_sim <- seal_data_sim %>%
+  group_by(slope, intercept, sigma, n) %>%
+  expand(reps = 1:n) %>%
+  ungroup()
+
+#simulate each # of times
+seal_data_sim <- seal_data_sim %>%
+  crossing(sim = 1:100)  #100 times #repeat many number of times
+
+#add in fitted values, simulate random draws of ages)
+seal_data_sim <- seal_data_sim %>%
+  mutate(age.days = runif(n(), 958, 8353)) %>% #range of seal ages
+  mutate(length.cm = rnorm(n(), intercept + slope*age.days, sigma)) #y = mx+ b
+
+seal_data_sim
+
+#fit a model and extracting coefficients
+seal_fit <- seal_data_sim %>%
+  group_by(slope, intercept, sigma, n, sim) %>%
+  nest() %>%
+  mutate(mod = purrr::map(data, ~lm(length.cm ~ age.days, data=.))) %>% #adding linear regression
+  mutate(coefficients = purrr::map(mod, ~tidy(.))) %>%
+  unnest(coefficients) %>%   
+  ungroup() %>%   
+  filter(term == "age.days")
+
+seal_fit
+
+#calculate powers to compare sample size, slope, intercept:
+
+#slope power
+seal_power_slope <- seal_fit  %>%
+  crossing(alpha = c(0.001, 0.05, 0.1)) %>% #adding 3 alphas
+  group_by(slope, n, alpha) %>%
+  #Calculating type 2 error
+  summarise(typ_II_err = sum(p.value > alpha)/n()) %>%
+  ungroup() %>%
+  filter(n == 15) %>%
+  #use type II error to calculate power
+  mutate(power = 1 - typ_II_err)
+
+#intercept power
+seal_power_intercept <- seal_fit  %>%
+  crossing(alpha = c(0.001, 0.05, 0.1)) %>% #adding 3 alphas
+  group_by(intercept, n, alpha) %>%
+  #Calculating type 2 error
+  summarise(typ_II_err = sum(p.value > alpha)/n()) %>%
+  ungroup() %>%
+  filter(n == 15) %>%
+  #use type II error to calculate power
+  mutate(power = 1 - typ_II_err)
+
+#n (sample size) power
+seal_power_sample_size <- seal_fit  %>%
+  crossing(alpha = c(0.001, 0.05, 0.1)) %>% #adding 3 alphas
+  group_by(n, alpha) %>%
+  #Calculating type 2 error
+  summarise(typ_II_err = sum(p.value > alpha)/n()) %>%
+  ungroup() %>%
+  #use type II error to calculate power
+  mutate(power = 1 - typ_II_err)
+
+
+#plot to show how slope, intercept, and sample size alter power of an F-test from a linear regression
+
+seal_slope_plot <- ggplot(data = seal_power_slope, 
+                     mapping = aes(x = slope, y = power, color = factor(alpha)))  +
+  geom_point() +
+  geom_line()  +
+  theme_bw() +
+  geom_hline(yintercept = 0.8, lty =2)
+
+seal_slope_plot
+
+seal_intercept_plot <- ggplot(data = seal_power_intercept, 
+                     mapping = aes(x = intercept, y = power, color = factor(alpha)))  +
+  geom_point() +
+  geom_line()  +
+  theme_bw() +
+  geom_hline(yintercept = 0.8, lty =2)
+
+seal_intercept_plot
+
+seal_sample_size_plot <- ggplot(data = seal_power_sample_size, 
+                        mapping = aes(x = n, y = power, color = factor(alpha))) +
+  geom_point() +
+  geom_line()  +
+  theme_bw() +
+  geom_hline(yintercept = 0.8, lty =2)
+
+seal_sample_size_plot
+
+
+```
+#####The plots show that: A larger slope increases power, especially with higher alphas. Intercept does not effect power much. And the larger the sample size, the higher the power. Power increase starts to flatten out more at about sample size 30.
+
+
+#4) Bayes Theorem
+####I've referenced the following figure a few times. I'd like you to demonstrate your understanding of Bayes Theorem by hand showing what the probability of the sun exploding is given the data. Assume that your prior probability that the sun explodes is p(Sun Explodes) = 0.0001. The rest of the information you need is in the cartoon!
+
+```{r Bayes theorum}
+####Bayes theorum:
+
+# p(H|D) = [p(D|H)*p(H)] / p(D)
+
+# p(D|H) = likelihood
+# p(H) = prior
+# p(D) = marginal probability p(D|H2)*p(H1) + p(D|H2)*p(H2)
+
+#p(SunExplodes|Yes) = [p(Yes|SunExplodes)*p(SunExplodes)] / p(Yes)
+  
+prob_yes_sun_exp <- 35/36 #can assume from cartoon, probability sun explodes given the data #this is p(D|H) aka likelihood
+prob_sun_explodes <- 0.0001  #prior given to us #this is p(H)
+
+#need to calculate marginal p(Yes): p(D|H2)*p(H1) + p(D|H2)*p(H2)
+
+prob_dice_lied_that_sun_exploaded <- 1/36  #probablity it says yes even though the sun didn't explode (it's lying)
+prob_no_sun_exploaded <- 1 - prob_sun_explodes #probablity the sun doesn't explode
+
+p_yes <- prob_yes_sun_exp*prob_sun_explodes + prob_dice_lied_that_sun_exploaded*prob_no_sun_exploaded #this is the marginal, p(D)
+
+#p(SunExplodes|Yes) = [prob_yes_sun_exp*prob_sun_explodes] / p_yes
+
+p_SunExplodes_Yes <- (prob_yes_sun_exp*prob_sun_explodes)/ p_yes
+
+p_SunExplodes_Yes
+```
+
+#####The probability the sun explodes given the data is 0.003593419
+
+
+
+#5) Quailing at the Prospect of Linear Models
+####I'd like us to walk through the three different 'engines' that we have learned about to fit linear models. To motivate this, we'll look at Burness et al.'s 2012 study "Post-hatch heat warms adult beaks: irreversible physiological plasticity in Japanese quail http://rspb.royalsocietypublishing.org/content/280/1767/20131436.short the data for which they have made available at Data Dryad at http://datadryad.org/resource/doi:10.5061/dryad.gs661. We'll be looking at the morphology data.
+
+```{r cache=TRUE, warning=FALSE, message=FALSE}
+morph_data <- read_csv("Morphology data.csv")
+
+head(morph_data)
+
+#initial visualization
+plot <- ggplot(data = morph_data, mapping = aes(x = `Culmen (mm)`, y = `Tarsus (mm)`)) +
+  geom_point()
+
+plot #at first glance it appears there is a positive linear trend of how leg length predicts beak length, but it also starts to curve a bit in the upper region.
+```
+
+
+##5.1 Three fits (10 points)
+####To begin with, I'd like you to fit the relationship that describes how Tarsus (leg) length predicts upper beak (Culmen) length. Fit this relationship using least squares, likelihood, and Bayesian techniques. For each fit, demonstrate that the necessary assumptions have been met. Note, functions used to fit with likelihood and Bayes may or may not behave well when fed NAs. So look out for those errors.
+
+
+####Least squares
+```{r three fits}
+#least squares model
+
+morph_lsqs <- lm(morph_data$`Culmen (mm)`~ morph_data$`Tarsus (mm)`) #when I take out morph_data$, Error in eval(predvars, data, env) : object 'Culmen (mm)' not found. It only works with morph_data$
+
+#checking assumptions
+plot(morph_lsqs, which = 1) #residuals scattered a bit
+plot(morph_lsqs, which = 2)#tails don't fit on qqplot line
+
+#testing assumptions
+summary(morph_lsqs) #F value is high, and P value is very small, so can reject the null
+
+#to address qqplot line weirdness, do a log transformation
+morph_lsqs_log <- lm(log(morph_data$`Culmen (mm)`) ~ log(morph_data$`Tarsus (mm)`))
+
+#checking assumption of log transformation
+plot(morph_lsqs_log, which = 1) #fts better than first residual plot
+plot(morph_lsqs_log, which = 2) #better fit for qq line, but one tail doesn't fit
+
+#testing assumptions
+summary(morph_lsqs_log) #same F value and P value
+```
+
+
+####Likelihood
+
+```{r three fits 2}
+#likelihood model 
+morph_glm <- glm((morph_data$`Culmen (mm)`~ morph_data$`Tarsus (mm)`), 
+                 data = morph_data,
+                 family = gaussian(link = "identity"))
+
+
+#checking assumptions
+morph_fit <- predict(morph_glm)
+morph_res<- residuals(morph_glm)
+qplot(morph_fit, morph_res) #no real pattern in fitted vs residuals, so good with model
+
+
+qqnorm(morph_res)
+qqline(morph_res) #tails are not a great fit again, log would be better fit
+
+plot(profile(morph_glm, objective = "ordinaryDeviance")) #lines are straight
+
+#testing assumptions
+#f-test
+morph_glm_null <- glm(morph_data$`Culmen (mm)` ~ 1, 
+                     family = gaussian(link = "identity"),
+                     data = morph_data)
+
+anova(morph_glm_null, morph_glm , test = "LRT") # f-value high, and p-value is small, so can reject the null
+
+#t-tests of parameters
+summary(morph_glm)
+```
+
+
+####Bayesian
+
+```{r three fits 3}
+#Bayesian model
+
+morph_data_csv <- read.csv("./Morphology data.csv") #for some reason I can only get Bayes to work with read.csv, but not read_csv, hence new data frame.
+head(morph_data_csv)
+
+morph_bayes <- brm(Culmen..mm.~ Tarsus..mm., #Culmen is response variable
+                   family = gaussian(link = "identity"),
+                   data = morph_data_csv ,
+                   file = "./morph_bayes.rds")  #NAs were excluded from model
+
+#checking assumptions:
+
+#look at chains:
+plot(morph_bayes) #looks normal
+#Inspect rhat
+mcmc_rhat(rhat(morph_bayes)) #close to 1, which is good
+#Inspect Autocorrelation
+mcmc_acf(as.data.frame(morph_bayes)) #autocorrelation drops off really quickly, so looks good
+
+
+#testing assumptions:
+
+#model assumptions
+morph_bayes_fit <- predict(morph_bayes) %>% as_tibble
+morph_bayes_res <- residuals(morph_bayes) %>% as_tibble
+
+qplot(morph_bayes_res$Estimate, morph_bayes_fit$Estimate) #no real pattern in fitted vs residuals, so good about gaussian model
+
+#fit
+pp_check(morph_bayes, type="scatter") #observed and fitted match up, so pretty good predictions
+
+#normality
+qqnorm(morph_bayes_res$Estimate)
+qqline(morph_bayes_res$Estimate) #pretty good fit, tails could be better
+pp_check(morph_bayes, type="error_hist", bins = 8) #each histogram looks normal
+
+##match to posterior
+pp_check(morph_bayes, type="stat_2d", test=c("mean", "sd")) #pretty good point cloud, well-centered around point.
+pp_check(morph_bayes) #pretty nice distribution fit
+```
+
+##5.2 Three interpretations (10 points)
+####OK, now that we have fits, take a look! Do the coefficients and their associated measures of error in their estimation match? How would we interpret the results from these different analyses differently? Or would we? Note, confint works on lm objects as well.
+
+####Least squares model
+```{r 5.2 lsqs}
+summary(morph_lsqs) #this shows we can reject the null with the low P-value.
+confint(morph_lsqs)
+```
+
+####Likelihood model
+```{r 5.2 likelihood}
+morph_glm
+confint(morph_glm) #this mathes the least sqauares confidence intervals
+```
+
+####Bayesian model
+```{r 5.2, bayes}
+plot(morph_bayes) #looks normal
+summary(morph_bayes, digits = 5) #Good effect of sample size, good R hat, CIs didn't include zero, so means they didn't overlap. 
+posterior_interval(morph_bayes) #confidence intervals - nice posteriors
+```
+
+#####When performing each model, all of them seem to show some sort of relationship of culmen length being affected by tarsus length. The least squares model is tested with an f-test and produces a p-value, which can be rejected or accepted based on an alpha of 0.05. P-value was small, which means the null hypothesis of no affect could be rejected. 
+
+#####The likelihood model looks at how well the data supports the given hypothesis, and each parameter choice is a hypothesis. It evaluates the weight of evidence for each hypothesis. It's similar to the frequentist method of least squares, looking at the probability for the data given the hypothesis. It has the same confidence intervals at the least squares model, and also works with p-values (which this test also produced a p-value to reject the null).
+
+#####The Bayesian model looks at the probability of the hypothesis given the data. It also includes prior hypotheses into the model, making it a better predictor. One reason it is a better predict is because you can evaluate the degree of belief.   
+
+
+##5.3 Everyday I'm Profilin' (10 points)  
+####For your likelihood fit, are your profiles well behaved? For just the slope, use grid sampling to create a profile. You'll need to write functions for this, and use the results from your glm() fit to provide the reasonable bounds of what you should be profiling over (3SE should do). Is it well behaved? Plot the profile and give the 80% and 95% CI. Verify your results with profileModel.
+
+```{r 5.3}
+#data generating proccess, need to make a function
+
+lik_func <- function(slope, intercept, resid_sd){
+    
+    morph_fit <- intercept + slope * morph_data$`Tarsus (mm)`
+
+    #likelihood
+    sum(dnorm(morph_data$`Culmen (mm)`, morph_fit, resid_sd, log = TRUE))
+}
+    
+    
+#grid sample
+
+summary(morph_glm) #to get values for grid. Intercept = -0.09871 
+profile(morph_glm, objective = "ordinaryDeviance")
+#range of slope values (3SE)
+
+morph_grid <- crossing(slope = seq(0.25, 0.45, 0.005),
+                        intercept = seq(-.75, -0.09871, .75),
+                        resid_sd = .5, 1.5, .05) %>% 
+  rowwise() %>% 
+  mutate(logl = lik_func(slope, intercept, resid_sd)) %>%
+  ungroup()
+
+
+#get our profiles so we can get the CI, looking via slope
+slope_prof <- morph_grid %>%
+  group_by(slope) %>%
+  filter(logl == max(logl)) %>% #filtering for max likelihood
+  ungroup()
+
+#plot profile
+slope_prof_plot <- ggplot(slope_prof,
+       mapping = aes(x = slope, y = logl)) + 
+  geom_line() +  xlim(0.35,0.39)+ ylim(-1260,-1248) #zoom in
+
+slope_prof_plot  #nothing plots? (couldn't answer if it behaves without plot)
+
+
+
+#give the 95% CI.
+#profile
+slope_prof %>%
+  filter(logl >= max(logl) - 1.96) %>% #1.96SE = CI
+  arrange(slope) %>%
+  filter(row_number()==1 | row_number()== n()) %>%
+  as.data.frame()
+
+
+#give the 80% CI.
+#profile
+slope_prof %>%
+  filter(logl >= max(logl) - 1.28) %>% #z value 1.28 = 80%CI
+  arrange(slope) %>%
+  filter(row_number()==1 | row_number()== n()) %>%
+  as.data.frame()
+
+
+#Verify your results with profileModel
+
+prof_mod <- profileModel(morph_glm,
+                              objective = "ordinaryDeviance")
+
+plot(prof_mod)
+```
+
+##5.4 The Power of the Prior (10 points)  
+####This data set is pretty big. After excluding NAs in the variables we're interested in, it's over 766 lines of data! Now, a lot of data can overhwelm a strong prior. But only to a point. Show first that there is enough data here that a prior for the slope with an estimate of 0.4 and a sd of 0.01 is overwhelmed by the data by demonstrating that it produces similar results to our already fit flat prior. Second, see if a very small sample size (n = 10) would at least include 0.4 in it's 95% Credible Interval. Last, demonstrate at what sample size that 95% CL first begins to include 0.4 when we have a strong prior. How much data do we really need to overcome our prior belief? Note, it takes a long time to fit these models, so, try a strategy of spacing out the 3-4 sample sizes, and then zoom in on an interesting region.
+
+####Show first that there is enough data here that a prior for the slope with an estimate of 0.4 and a sd of 0.01 is overwhelmed by the data by demonstrating that it produces similar results to our already fit flat prior.
+```{r  warning=FALSE, message=FALSE}
+prior_summary(morph_bayes)
+
+morph_bayes_prior <- brm(Culmen..mm.~ Tarsus..mm., 
+                         family = gaussian(link = "identity"),
+                         data = morph_data_csv,
+                         prior = c(
+                           prior(normal(0.4,0.01))),
+                         file = "./morph_bayes_prior.rds")  #NAs were excluded from model
+
+#checking assumptions: 
+
+#look at chains:
+plot(morph_bayes_prior)  #looks normal
+#Inspect rhat
+mcmc_rhat(rhat(morph_bayes_prior))  #almost all close to 1, so good
+#Inspect Autocorrelation
+mcmc_acf(as.data.frame(morph_bayes_prior))  #autocorrelation drops off really quickly, so looks good
+
+
+#testing assumptions:
+
+#model assumptions
+morph_bayes_prior_fit <- predict(morph_bayes_prior) %>% as_tibble
+morph_bayes_prior_res <- residuals(morph_bayes_prior) %>% as_tibble
+
+qplot(morph_bayes_prior_res$Estimate, morph_bayes_prior_fit$Estimate)  #no patterns in fitted vs residuals, so good about gaussian model
+
+#fit
+pp_check(morph_bayes_prior, type ="scatter") #do observed and fitted match up? pretty good predictions
+
+#normality
+qqnorm(morph_bayes_prior_res$Estimate)
+qqline(morph_bayes_prior_res$Estimate) #fits pretty ok, tails slightly off
+pp_check(morph_bayes_prior, type="error_hist", bins = 8)  #each histogram looks pretty normal
+
+##match to posterior
+pp_check(morph_bayes_prior, type="stat_2d", test=c("mean", "sd")) #Stat 2d pretty good point cloud
+pp_check(morph_bayes_prior) #pretty nice of distribution
+
+posterior_interval(morph_bayes_prior) 
+
+summary(morph_bayes_prior, digits = 5)  #0.4 is not in the CI
+
+```
+
+####See if a very small sample size (n = 10) would at least include 0.4 in it's 95% Credible Interval
+
+```{r small sample size}
+#sample size of n = 10 data creation
+sample_10_size <- data.frame(Tarsus10 = morph_data_csv$Tarsus..mm.[1:10],
+                             Culmen10 = morph_data_csv$Culmen..mm. [1:10])
+
+sample_10_size
+
+morph_bayes_prior_n10 <- brm(Culmen10 ~ Tarsus10, 
+                         family = gaussian(link = "identity"),
+                         data = sample_10_size,
+                         prior = c(
+                           prior(normal(0.4,0.01))),
+                         file = "./morph_bayes_prior_n10.rds") 
+
+posterior_interval(morph_bayes_prior_n10) 
+
+summary(morph_bayes_prior_n10, digits = 5) 
+```
+#####Yes, it does include 0.4 in it's 95% Credible Interval.
+
+
+
+####Last, demonstrate at what sample size that 95% CL first begins to include 0.4 when we have a strong prior. How much data do we really need to overcome our prior belief?
+
+```{r  warning=FALSE, message=FALSE}
+#need to make different sample size data to test:
+
+sample_100_size <- data.frame(Tarsus100 = morph_data_csv$Tarsus..mm.[1:100],
+                             Culmen100 = morph_data_csv$Culmen..mm. [1:100])
+
+sample_100_size
+
+morph_bayes_prior_n100 <- brm(Culmen100 ~ Tarsus100, 
+                             family = gaussian(link = "identity"),
+                             data = sample_100_size,
+                             prior = c(
+                               prior(normal(0.4,0.01))),
+                             file = "./morph_bayes_prior_n100.rds") 
+
+
+posterior_interval(morph_bayes_prior_n100) 
+
+summary(morph_bayes_prior_n100, digits = 5) 
+
+#####yes, it does include 0.4 in it's 95% Credible Interval.
+
+sample_200_size <- data.frame(Tarsus200 = morph_data_csv$Tarsus..mm.[1:200],
+                              Culmen200 = morph_data_csv$Culmen..mm. [1:200])
+
+sample_200_size
+
+morph_bayes_prior_n200 <- brm(Culmen200 ~ Tarsus200, 
+                              family = gaussian(link = "identity"),
+                              data = sample_200_size,
+                              prior = c(
+                                prior(normal(0.4,0.01))),
+                              file = "./morph_bayes_prior_n200.rds") 
+
+
+posterior_interval(morph_bayes_prior_n200) 
+
+summary(morph_bayes_prior_n200, digits = 5) 
+
+#####no, it doesn't include 0.4 in it's 95% Credible Interval.
+
+sample_150_size <- data.frame(Tarsus150 = morph_data_csv$Tarsus..mm.[1:150],
+                              Culmen150 = morph_data_csv$Culmen..mm. [1:150])
+
+sample_150_size
+
+morph_bayes_prior_n150 <- brm(Culmen150 ~ Tarsus150, 
+                              family = gaussian(link = "identity"),
+                              data = sample_150_size,
+                              prior = c(
+                                prior(normal(0.4,0.01))),
+                              file = "./morph_bayes_prior_n150.rds") 
+
+
+posterior_interval(morph_bayes_prior_n150) 
+
+summary(morph_bayes_prior_n150, digits = 5) 
+
+#####no, it doesn't include 0.4 in it's 95% Credible Interval.
+```
+#####Somewhere between 100-150 is how much data we really need to overcome our prior belief.
+
+
+
+
+
+     
